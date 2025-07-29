@@ -1,0 +1,118 @@
+
+<!-- Satisfaction Survey Form Template -->
+</style>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-7 col-lg-6">
+      <div class="card border-0 shadow-lg rounded-4">
+        <div class="card-body p-4">
+          <div class="text-center mb-4">            
+            <h3 class="fw-bold">Pesquisa de Satisfação</h3>
+            <p class="text-muted">Avalie o atendimento recebido e nos ajude a melhorar.</p>
+          </div>
+          <form id="satisfactionSurveyForm">
+            <div class="mb-4 text-center">
+              <label class="form-label fw-semibold mb-2">Como você avalia o atendimento?</label>
+              <div id="star-rating" class="mb-2 d-flex justify-content-center gap-2">
+                <span class="star" data-value="1" title="Péssimo">&#128545;</span>
+                <span class="star" data-value="2" title="Ruim">&#128542;</span>
+                <span class="star" data-value="3" title="Regular">&#128528;</span>
+                <span class="star" data-value="4" title="Bom">&#128522;</span>
+                <span class="star" data-value="5" title="Excelente">&#128525;</span>
+              </div>
+              <div class="small text-muted">Clique no emoji que representa sua experiência.</div>
+            </div>
+            <div class="mb-4">
+              <label for="comment" class="form-label fw-semibold">Comentário (opcional)</label>
+              <textarea class="form-control rounded-3" id="comment" name="comment" rows="3" placeholder="Deixe seu comentário..." maxlength="500"></textarea>
+            </div>
+            <input type="hidden" name="ticket_id" id="ticket_id" value="{{TICKET_ID}}">
+            <button type="submit" class="btn btn-success w-100 fw-bold py-2">Enviar avaliação</button>
+            <div id="feedback" class="mt-3"></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+  body {
+    background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+  }
+  .star {
+    font-size: 2.5rem;
+    color: #bdbdbd;
+    cursor: pointer;
+    transition: color 0.2s, transform 0.2s;
+    user-select: none;
+  }
+  .star.selected {
+    color: #ff9800;
+    background: #fffbe6;
+    border-radius: 50%;
+    box-shadow: 0 0 4px #ff9800, 0 0 0 2px #fffbe6;
+    transform: scale(1.08);
+    text-shadow: 0 0 4px #ff9800;
+    padding: 0.08em;
+  }
+  .star:hover {
+    color: #ff9800;
+    transform: scale(1.15);
+  }
+  .card {
+    border-radius: 1.5rem;
+  }
+</style>
+<script>
+  const stars = document.querySelectorAll('.star');
+  let selectedRating = 0;
+  stars.forEach(star => {
+    star.addEventListener('mouseover', function() {
+      const val = parseInt(this.getAttribute('data-value'));
+      stars.forEach((s, i) => {
+        s.classList.toggle('selected', i < val);
+      });
+    });
+    star.addEventListener('mouseout', function() {
+      stars.forEach((s, i) => {
+        s.classList.toggle('selected', i < selectedRating);
+      });
+    });
+    star.addEventListener('click', function() {
+      selectedRating = parseInt(this.getAttribute('data-value'));
+      document.getElementById('star-rating').setAttribute('data-selected', selectedRating);
+      stars.forEach((s, i) => {
+        s.classList.toggle('selected', i < selectedRating);
+      });
+    });
+  });
+  document.getElementById('satisfactionSurveyForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const rating = selectedRating;
+    const comment = document.getElementById('comment').value;
+    const ticket_id = document.getElementById('ticket_id').value;
+    if (!rating) {
+      document.getElementById('feedback').innerHTML = '<div class="alert alert-warning">Por favor, selecione uma nota.</div>';
+      return;
+    }
+    fetch('ajax/survey.submit.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: `rating=${encodeURIComponent(rating)}&comment=${encodeURIComponent(comment)}&ticket_id=${encodeURIComponent(ticket_id)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        window.location.href = 'front/thankyou.php';
+      } else {
+        document.getElementById('feedback').innerHTML = `<div class=\"alert alert-danger\">${data.message}</div>`;
+      }
+    })
+    .catch(() => {
+      document.getElementById('feedback').innerHTML = '<div class="alert alert-danger">Erro ao enviar resposta. Tente novamente.';
+    });
+  });
+</script>

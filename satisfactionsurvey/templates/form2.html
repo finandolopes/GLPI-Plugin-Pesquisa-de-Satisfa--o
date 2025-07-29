@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Pesquisa de Satisfação - CROSS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: #f4f6f8;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    .cross-header {
+      background: #003366;
+      color: #fff;
+      padding: 1.5rem 0;
+      border-radius: 1rem 1rem 0 0;
+      text-align: center;
+    }
+    .cross-card {
+      border-radius: 1rem;
+      box-shadow: 0 2px 12px #d1d9e6;
+      border: 1px solid #e3e7ed;
+      background: #fff;
+    }
+    .star {
+      font-size: 2.2rem;
+      color: #b0b7c3;
+      cursor: pointer;
+      transition: color 0.2s, transform 0.2s;
+      user-select: none;
+    }
+    .star.selected {
+      color: #ffc107;
+      transform: scale(1.15);
+      text-shadow: 0 0 8px #ffd966;
+    }
+    .star:hover {
+      color: #ff9800;
+    }
+    .btn-cross {
+      background: #003366;
+      color: #fff;
+      font-weight: 600;
+      border-radius: 0.5rem;
+      border: none;
+    }
+    .btn-cross:hover {
+      background: #00509e;
+      color: #fff;
+    }
+    .cross-label {
+      color: #003366;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-7 col-lg-6">
+      <div class="cross-card">
+        <div class="cross-header">
+          <h3 class="mb-0">Pesquisa de Satisfação</h3>
+          <small></small>
+        </div>
+        <div class="card-body p-4">
+          <form id="satisfactionSurveyForm2">
+            <div class="mb-4 text-center">
+              <label class="form-label cross-label mb-2">Como você avalia o atendimento?</label>
+              <div id="star-rating2" class="mb-2 d-flex justify-content-center gap-2">
+                <span class="star" data-value="1" title="Muito ruim">&#9733;</span>
+                <span class="star" data-value="2" title="Ruim">&#9733;</span>
+                <span class="star" data-value="3" title="Regular">&#9733;</span>
+                <span class="star" data-value="4" title="Bom">&#9733;</span>
+                <span class="star" data-value="5" title="Excelente">&#9733;</span>
+              </div>
+              <div class="small text-muted">Clique na estrela que representa sua experiência.</div>
+            </div>
+            <div class="mb-4">
+              <label for="comment2" class="form-label cross-label">Comentário (opcional)</label>
+              <textarea class="form-control rounded-3" id="comment2" name="comment2" rows="3" placeholder="Deixe seu comentário..." maxlength="500"></textarea>
+            </div>
+            <input type="hidden" name="ticket_id" id="ticket_id2" value="{{TICKET_ID}}">
+            <button type="submit" class="btn btn-cross w-100 py-2">Enviar avaliação</button>
+            <div id="feedback2" class="mt-3"></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  const stars2 = document.querySelectorAll('.star');
+  let selectedRating2 = 0;
+  stars2.forEach(star => {
+    star.addEventListener('mouseover', function() {
+      const val = parseInt(this.getAttribute('data-value'));
+      stars2.forEach((s, i) => {
+        s.classList.toggle('selected', i < val);
+      });
+    });
+    star.addEventListener('mouseout', function() {
+      stars2.forEach((s, i) => {
+        s.classList.toggle('selected', i < selectedRating2);
+      });
+    });
+    star.addEventListener('click', function() {
+      selectedRating2 = parseInt(this.getAttribute('data-value'));
+      document.getElementById('star-rating2').setAttribute('data-selected', selectedRating2);
+      stars2.forEach((s, i) => {
+        s.classList.toggle('selected', i < selectedRating2);
+      });
+    });
+  });
+  document.getElementById('satisfactionSurveyForm2').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const rating = selectedRating2;
+    const comment = document.getElementById('comment2').value;
+    const ticket_id = document.getElementById('ticket_id2').value;
+    if (!rating) {
+      document.getElementById('feedback2').innerHTML = '<div class="alert alert-warning">Por favor, selecione uma nota.</div>';
+      return;
+    }
+    // AJAX submit
+    fetch('ajax/survey.submit.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: `rating=${encodeURIComponent(rating)}&comment=${encodeURIComponent(comment)}&ticket_id=${encodeURIComponent(ticket_id)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        window.location.href = 'front/thankyou.php';
+      } else {
+        document.getElementById('feedback2').innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+      }
+    })
+    .catch(() => {
+      document.getElementById('feedback2').innerHTML = '<div class="alert alert-danger">Erro ao enviar resposta. Tente novamente.';
+    });
+  });
+</script>
+</body>
+</html>
