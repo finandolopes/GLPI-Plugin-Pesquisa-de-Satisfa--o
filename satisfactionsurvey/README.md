@@ -1,7 +1,7 @@
-# Plugin SatisfactionSurvey para GLPI
+# Plugin Pesquisa de Satisfação para GLPI.
 
 ## Visão Geral
-O SatisfactionSurvey é um plugin moderno para GLPI que permite enviar pesquisas de satisfação automaticamente ao cliente após o fechamento de chamados, coletar respostas, analisar resultados e gerar relatórios visuais.
+ E um plugin para GLPI que permite enviar pesquisas de satisfação automaticamente ao cliente após o fechamento de chamados, coletar respostas, analisar resultados e gerar relatórios visuais.
 
 ## Recursos
 - Envio automático de pesquisa por e-mail ao fechar chamado
@@ -110,4 +110,4 @@ satisfactionsurvey/
 ```
 
 ## Suporte e Customização
-Para dúvidas, sugestões ou customizações, consulte a documentação do GLPI ou entre em contato com o desenvolvedor do plugin.
+Para dúvidas, sugestões ou customizações, consulte a documentação do GLPI ou entre em contato.
